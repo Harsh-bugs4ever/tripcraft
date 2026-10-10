@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="800" viewBox="0 0 1440 800" role="img" aria-labelledby="title desc">
+  <title id="title">TripCraft system workflow</title>
+  <desc id="desc">Traveler input flows through the React frontend and Spring Boot API to planning services, external data providers, and JSON persistence before the itinerary is returned.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#667085"/>
+    </marker>
+    <style>
+      .bg{fill:#f7f8fc}.title{font:700 30px Inter,Segoe UI,Arial,sans-serif;fill:#182230}.subtitle{font:16px Inter,Segoe UI,Arial,sans-serif;fill:#667085}
+      .label{font:700 18px Inter,Segoe UI,Arial,sans-serif;fill:#182230}.body{font:15px Inter,Segoe UI,Arial,sans-serif;fill:#475467}.small{font:700 13px Inter,Segoe UI,Arial,sans-serif;fill:#667085;letter-spacing:1px}
+      .node{stroke-width:2}.line{fill:none;stroke:#667085;stroke-width:2.5;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect class="bg" width="1440" height="800" rx="24"/>
+  <text class="title" x="72" y="74">TripCraft · System workflow</text>
+  <text class="subtitle" x="72" y="106">One Spring Boot application handles planning, provider access, and trip persistence.</text>
+
+  <text class="small" x="72" y="166">REQUEST AND RESPONSE</text>
+  <rect class="node" x="72" y="194" width="220" height="126" rx="16" fill="#fff" stroke="#d0d5dd"/>
+  <text class="label" x="182" y="239" text-anchor="middle">Traveler</text>
+  <text class="body" x="182" y="270" text-anchor="middle">Dates · budget · preferences</text>
+
+  <rect class="node" x="354" y="194" width="248" height="126" rx="16" fill="#eef4ff" stroke="#84adff"/>
+  <text class="label" x="478" y="239" text-anchor="middle">React frontend</text>
+  <text class="body" x="478" y="270" text-anchor="middle">Trip wizard · map · itinerary</text>
+
+  <rect class="node" x="664" y="194" width="248" height="126" rx="16" fill="#ecfdf3" stroke="#75e0a7"/>
+  <text class="label" x="788" y="239" text-anchor="middle">Spring Boot API</text>
+  <text class="body" x="788" y="270" text-anchor="middle">Validation · sessions · REST</text>
+
+  <rect class="node" x="974" y="194" width="248" height="126" rx="16" fill="#f4f3ff" stroke="#bdb4fe"/>
+  <text class="label" x="1098" y="239" text-anchor="middle">Planning services</text>
+  <text class="body" x="1098" y="270" text-anchor="middle">Discover · schedule · budget</text>
+
+  <path class="line" d="M292 257 H344"/>
+  <path class="line" d="M602 257 H654"/>
+  <path class="line" d="M912 257 H964"/>
+  <path class="line" d="M964 294 H622 V352 H478 V330"/>
+  <text class="body" x="730" y="382" text-anchor="middle">Validated itinerary returned to the traveler</text>
+
+  <text class="small" x="72" y="454">SERVICE DEPENDENCIES</text>
+  <rect class="node" x="124" y="488" width="330" height="156" rx="16" fill="#fff7ed" stroke="#fdba74"/>
+  <text class="label" x="289" y="531" text-anchor="middle">Live travel data</text>
+  <text class="body" x="289" y="563" text-anchor="middle">SerpApi: places, stays, flights, news</text>
+  <text class="body" x="289" y="591" text-anchor="middle">Groq ranking is optional</text>
+
+  <rect class="node" x="555" y="488" width="330" height="156" rx="16" fill="#ecfeff" stroke="#67e8f9"/>
+  <text class="label" x="720" y="531" text-anchor="middle">Weather data</text>
+  <text class="body" x="720" y="563" text-anchor="middle">Open-Meteo forecast</text>
+  <text class="body" x="720" y="591" text-anchor="middle">Weather-aware replanning</text>
+
+  <rect class="node" x="986" y="488" width="330" height="156" rx="16" fill="#f9fafb" stroke="#d0d5dd"/>
+  <text class="label" x="1151" y="531" text-anchor="middle">Trip persistence</text>
+  <text class="body" x="1151" y="563" text-anchor="middle">Atomic JSON snapshots</text>
+  <text class="body" x="1151" y="591" text-anchor="middle">Signed guest session ownership</text>
+
+  <path class="line" d="M1098 320 V418 H289 V478"/>
+  <path class="line" d="M1098 320 V478"/>
+  <path class="line" d="M1098 320 V418 H1151 V478"/>
+  <text class="subtitle" x="72" y="710">Development: Vite proxies /api/v1 to Java. Production: Spring Boot serves the built frontend and API.</text>
+</svg>

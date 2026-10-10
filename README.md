@@ -1,354 +1,128 @@
-<div align="center">
+# TripCraft
 
-# ✈️ TripCraft 2.0
+TripCraft is a full-stack trip planner for India. It combines a React and TypeScript interface with a Java and Spring Boot API to create, adapt, and save multi-day itineraries.
 
-### **Intelligent, Live-Sourced Travel Planning for India**
+## System workflow
 
-[![Java](https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.16-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?style=for-the-badge&logo=leaflet&logoColor=white)](https://leafletjs.com/)
+The diagram shows the main request and data flow. The SVG can be imported into Excalidraw if you want to annotate or adapt it.
 
-<p align="center">
-  <b>A full-stack, enterprise-grade travel planner pairing a high-performance Java 17 + Spring Boot modular monolith backend with a dynamic React 19 + TypeScript frontend.</b>
-</p>
+![TripCraft system workflow](docs/system-workflow.svg)
 
-[Key Features](#-key-features) •
-[Screenshots](#-visual-showcase) •
-[Architecture](#-system-architecture) •
-[Quick Start](#-quick-start) •
-[Environment Variables](#-configuration--environment-variables) •
-[Available Scripts](#-project-scripts) •
-[Verification](#-testing--verification)
+Diagram file: [`docs/system-workflow.svg`](docs/system-workflow.svg)
 
----
+### What happens when a trip is planned
 
-</div>
+1. The traveler enters dates, destination, budget, pace, and preferences in the React app.
+2. The frontend sends an `/api/v1` request to the Spring Boot backend. During local development, Vite proxies this request to Java.
+3. The backend validates the request and obtains a signed guest session when needed.
+4. Planner and discovery services gather candidate places and supporting information. SerpApi provides live travel results; Open-Meteo provides weather. Groq ranking is optional.
+5. The scheduling and budget services build a constraint-aware itinerary. The backend validates and stores trip state as atomic JSON snapshots.
+6. The API returns the itinerary to the frontend, where the traveler can review, adapt, save, and export it.
 
-## 🌟 Overview
+TripCraft is a **modular monolith**. These backend services run in one Spring Boot application; they are not separately deployed microservices.
 
-**TripCraft 2.0** is an intelligent travel planning platform engineered specifically for destinations across India. Combining live data streams from **SerpApi** (Google Maps places, restaurants, hotels, flights, and disruption news), real-time forecasts from **Open-Meteo**, and optional AI candidate ranking via **Groq LLM**, TripCraft builds realistic, constraint-validated multi-day itineraries.
+## Features
 
-The system replaces synthetic mock itineraries with authentic live-sourced data:
-- **Zero Hallucinated Locations:** Every recommendation is grounded in live provider queries.
-- **Dynamic Weather Adaptation:** Automated 16-day forecast integration with smart indoor-first pivot heuristics during inclement conditions.
-- **Enterprise-Grade Backend:** Re-architected in Java 17 & Spring Boot 3.5 with atomic JSON persistence, signed session tokens, and crash-resilient background job management.
+- Build itineraries for trips from 1 to 14 days.
+- Set travel pace, budget, food preferences, accessibility needs, and fixed activities.
+- Review places sourced from live provider results.
+- Check forecasts and adapt plans around weather risks.
+- Track trip budgets and edit, lock, or mark itinerary stops as visited.
+- Save trips with signed guest sessions, then export or print an itinerary.
+- Use optional Groq ranking; deterministic ranking remains available without Groq credentials.
 
----
+## Technology
 
-## 📸 Visual Showcase
+| Area | Technology |
+| --- | --- |
+| Frontend | React 19, TypeScript, Vite 8, Tailwind CSS 4 |
+| Maps | Leaflet and OpenStreetMap tiles |
+| Backend | Java 17, Spring Boot 3.5, embedded Tomcat |
+| Trip data | SerpApi for travel search; Open-Meteo for weather |
+| Optional ranking | Groq API |
+| Persistence | Atomic JSON snapshots in the configured data directory |
 
-<div align="center">
+## Run locally
 
-| 🌍 3D Animated Hero Experience | 📋 Interactive Trip Wizard |
-| :---: | :---: |
-| ![TripCraft Hero](docs/screenshots/home-desktop.png) | ![Planning Wizard](docs/screenshots/planning-desktop.png) |
-| *Interactive 3D CSS globe, orbiting plane & parallax effects* | *Step-by-step custom pace, dietary, stay & anchor preferences* |
+### Requirements
 
-| 🗺️ Itinerary Workspace & Maps | 📱 Responsive Mobile Experience |
-| :---: | :---: |
-| ![Itinerary Workspace](docs/screenshots/itinerary-desktop.png) | ![Mobile Experience](docs/screenshots/home-mobile.png) |
-| *Timeline management, Leaflet map routing & live budget breakdown* | *Fully adaptive layout with gesture & reduced-motion support* |
+- Java 17 or newer (a JDK is needed to build the backend)
+- Node.js 22.12 or newer and npm
 
-</div>
+### Development mode
 
----
-
-## ✨ Key Features
-
-### 🗺️ Multi-Day Itinerary Engine
-- **1 to 14 Day Planning:** Dynamically generates balanced daily itineraries customized by travel pace, rest gaps, and preferred food styles.
-- **Fixed Anchor Activities:** Pin must-do attractions to specific days and let the constraint solver schedule around them.
-- **Dietary & Accessibility Filters:** Explicit support for vegetarian/vegan diets and mobility-conscious itineraries.
-- **Lock & Visited Markers:** Lock key stops against accidental rescheduling and mark completed activities as you travel.
-
-### 🌦️ Live Weather & Smart Replanning
-- **16-Day Forecast Horizon:** Integrates Open-Meteo for daily high/low temperatures, precipitation chances, rainfall volume, and wind speeds.
-- **Smart Risk Heuristics:** Automated warnings for rain (≥60%), extreme heat (≥38°C), and severe weather / thunderstorms (code ≥95).
-- **Single-Click Weather Adaptation:** Automatically pause unlocked outdoor activities and swap in curated indoor alternatives or low-effort schedules.
-- **Live Disruption Watch:** Pulls recent verified news reports for travel disruptions, road closures, and regional advisories.
-
-### 🔍 Grounded Live Provider Integrations
-- **SerpApi Engine:** Queries Google Maps places, top-rated restaurants, hotel accommodations, and indicative flight connections.
-- **Local-Pick Confidence:** Identifies verified local favorites with corroboration links and distance proximity within a 5 km radius.
-- **Budget Tracking:** Integer-paise financial precision with food costs counted accurately and clear itemized expense breakdowns.
-
-### 🤖 Grounded AI Ranking (Optional Groq)
-- **Safe Hybrid Planning:** Groq models (`openai/gpt-oss-120b` or custom) rank pre-filtered candidate places without hallucinating details.
-- **Strict Server-Side Validation:** The Spring Boot backend owns scheduling, time windows, and budget math. If AI credentials are unavailable or format errors occur, the planner seamlessly falls back to the deterministic constraint engine.
-
-### 🎨 Immersive & Accessible Interface
-- **3D Animated Elements:** Lightweight CSS 3D interactive globe, orbiting aircraft, floating postcards, and pointer parallax.
-- **Full Motion Controls:** Dedicated pause toggles and automatic honoring of `prefers-reduced-motion` browser preferences.
-- **Export & Print Ready:** Export clean JSON files or generate printable/PDF travel dossiers with one click.
-
-### 🔒 Enterprise Persistence & Sessions
-- **Signed Session Cookies:** Cryptographically signed HMAC guest sessions to protect trip ownership without mandatory sign-up walls.
-- **Atomic Persistence:** Robust file-lock-protected atomic state storage preventing race conditions and data corruption.
-- **Job Recovery:** Background generation tasks automatically recover from restarts with graceful cancellation and retry mechanisms.
-
----
-
-## 🏗️ System Architecture
-
-TripCraft is structured as a **modular monolith** with clean separation between the presentation layer, REST API, scheduling domain, and provider gateways.
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          React 19 + Vite Frontend                           │
-│     (Tailwind CSS 4 • Leaflet Maps • Lucide Icons • 3D CSS Scenes)         │
-└──────────────────────────────────────┬──────────────────────────────────────┘
-                                       │  HTTP /api/v1  (Proxy in dev)
-                                       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                       Java 17 + Spring Boot 3 Backend                       │
-│                                                                             │
-│  ┌────────────────────────┐  ┌───────────────────────┐  ┌────────────────┐  │
-│  │     TripController     │  │     SessionFilter     │  │   StateStore   │  │
-│  │  REST Endpoints & Jobs │  │ Signed HMAC & Headers │  │  Atomic JSON   │  │
-│  └───────────┬────────────┘  └───────────────────────┘  └───────▲────────┘  │
-│              │                                                  │           │
-│  ┌───────────▼────────────┐  ┌───────────────────────┐          │           │
-│  │     PlannerService     │──│    ScheduleService    │──────────┤           │
-│  │ Multi-day Engine & Alt │  │  Pace, Gaps & Anchors │          │           │
-│  └───────────┬────────────┘  └───────────────────────┘          │           │
-│              │                                                  │           │
-│  ┌───────────▼────────────┐  ┌───────────────────────┐  ┌───────▼────────┐  │
-│  │    DiscoveryService    │  │    WeatherService     │  │ BudgetService  │  │
-│  │ SerpApi & Groq Ground  │  │   Open-Meteo Radar    │  │ Integer-Paise  │  │
-│  └───────────┬────────────┘  └───────────┬───────────┘  └────────────────┘  │
-└──────────────┼───────────────────────────┼──────────────────────────────────┘
-               │                           │
-               ▼                           ▼
-      ┌─────────────────┐         ┌─────────────────┐
-      │     SerpApi     │         │   Open-Meteo    │
-      │  (Google Maps/  │         │   (16-Day Live  │
-      │   Hotels/News)  │         │    Forecasts)   │
-      └─────────────────┘         └─────────────────┘
-```
-
----
-
-## 🧰 Tech Stack
-
-| Domain | Technology | Details |
-| :--- | :--- | :--- |
-| **Backend** | Java 17, Spring Boot 3.5.16 | Embedded Tomcat, Jakarta Validation, HttpClient |
-| **Frontend** | React 19, TypeScript, Vite 8 | Modern React hooks, typed domain contracts |
-| **Styling** | Tailwind CSS 4, Modern CSS3 | Custom 3D CSS perspective transforms, dark/light accents |
-| **Mapping** | Leaflet 1.9, React-Leaflet | OpenStreetMap tiles, interactive coordinate pins |
-| **Live Travel Data** | SerpApi | Google Maps places, reviews, hotels, flights & news |
-| **Weather** | Open-Meteo API | Free global non-commercial forecast API (up to 16 days) |
-| **Optional AI** | Groq Cloud API | High-throughput candidate place ranking |
-| **Testing** | JUnit 5, Mockito, Playwright | Unit, integration, and full-stack end-to-end testing |
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-- **JDK 17 or newer** (`java -version` and `javac -version`)
-- **Node.js 22.12+** and **npm** (`node -version`)
-- **SerpApi API Key** (Free tier available at [serpapi.com](https://serpapi.com/manage-api-key))
-
----
-
-### Option A: Run Pre-Packaged JAR (Instant Launch)
-
-The repository includes a ready-to-run compiled JAR that bundles both the backend API and frontend assets:
+From the repository root:
 
 ```powershell
-# 1. Clone repository & enter folder
-cd tripcraft
-
-# 2. Configure environment
-if (!(Test-Path .env)) { Copy-Item .env.example .env }
-
-# 3. Add your SerpApi key to .env, then run:
-java -jar backend/tripcraft-backend.jar
-```
-
-Open **http://localhost:8080** in your browser.
-
----
-
-### Option B: Full Development Setup (Hot Reload)
-
-For active frontend and backend development:
-
-```powershell
-# 1. Install frontend dependencies
 npm ci
-
-# 2. Build the Spring Boot backend
 npm run build:backend
-
-# 3. Launch dual development server
 npm run dev
 ```
 
-- **Frontend (Vite with Hot Module Replacement):** [http://localhost:3000](http://localhost:3000)
-- **Backend (Spring Boot API):** [http://localhost:8080](http://localhost:8080)
-- Requests to `/api/*` on port `3000` are automatically proxied to port `8080`.
+Open `http://localhost:3000`. Vite serves the frontend and proxies `/api` requests to the Java backend on port `8080`.
 
----
+### Production-style local run
 
-## ⚙️ Configuration & Environment Variables
-
-Copy `.env.example` to `.env` in the project root:
-
-```env
-# ==============================================================================
-# Live Travel Provider (Required for Real Places & Corroboration)
-# ==============================================================================
-SERPAPI_API_KEY=your_serpapi_account_key
-
-# ==============================================================================
-# AI Place Ranking (Optional)
-# ==============================================================================
-GROQ_API_KEY=your_groq_api_key
-GROQ_MODEL=openai/gpt-oss-120b
-
-# ==============================================================================
-# Live Weather Provider (Open-Meteo)
-# ==============================================================================
-WEATHER_BASE_URL=https://api.open-meteo.com/v1/forecast
-WEATHER_API_KEY=
-
-# ==============================================================================
-# Server & Security Settings
-# ==============================================================================
-PORT=8080
-HOST=127.0.0.1
-DATA_DIR=.data
-SESSION_SECRET=your_random_session_secret_here
-COOKIE_SECURE=false
-FRONTEND_ORIGIN=http://localhost:3000
-```
-
-### Key Provider Notes:
-- **SerpApi:** A single API key powers Google Maps places, restaurants, corroboration, hotels, flights, and news. No separate Google Cloud console key required.
-- **Groq:** If omitted, TripCraft automatically uses its robust built-in constraint ranking engine.
-- **Open-Meteo:** The default public endpoint requires no API key. For high-volume or commercial usage, supply a paid customer endpoint and key.
-
----
-
-## 📜 Project Scripts
-
-Run the following commands from the project root:
-
-| Command | Action |
-| :--- | :--- |
-| `npm run dev` | Starts Spring Boot on `8080` & Vite with HMR on `3000` simultaneously |
-| `npm run dev:frontend` | Starts only the Vite development server on port `3000` |
-| `npm run build` | Compiles and builds the production React application to `dist/` |
-| `npm run build:backend` | Packages the Spring Boot backend JAR using Maven Wrapper |
-| `npm start` | Launches the packaged production JAR (`tripcraft-backend.jar`) |
-| `npm run lint` | Runs TypeScript compiler checks across the codebase (`tsc --noEmit`) |
-| `npm run test:backend` | Runs Java unit and integration tests via Maven |
-| `npm run test:e2e` | Runs Playwright end-to-end browser tests against live JAR |
-| `npm run format` | Formats source files using Prettier |
-
----
-
-## 📁 Repository Structure
-
-```
-tripcraft/
-├── backend/                       # Java 17 + Spring Boot 3.5 application
-│   ├── src/main/java/in/tripcraft # Domain controllers, services, security
-│   ├── src/test/java/in/tripcraft # Unit and integration tests
-│   ├── pom.xml                    # Maven configuration & dependencies
-│   ├── mvnw / mvnw.cmd            # Maven wrapper binaries
-│   └── tripcraft-backend.jar      # Pre-packaged executable JAR
-├── docs/                          # Architecture & design documentation
-│   ├── screenshots/               # Application preview images
-│   ├── ARCHITECTURE.md            # Service boundaries & data flows
-│   ├── REQUIREMENTS.md            # Product specification traceability
-│   └── VERIFICATION.md            # Test matrix and verification records
-├── public/                        # Static assets (images, icons, credits)
-├── scripts/                       # Node automation and build helper scripts
-│   ├── dev.mjs                    # Dual-process development runner
-│   ├── build-backend.mjs          # Cross-platform Maven invoker
-│   └── browser-check.mjs          # Playwright test harness
-├── src/                           # React 19 Frontend application
-│   ├── components/                # UI components (Wizard, Hero, Workspace, Map)
-│   ├── types/                     # TypeScript shared interfaces
-│   ├── App.tsx                    # Root application component & routing
-│   └── index.css                  # Tailwind styles and 3D animations
-├── .env.example                   # Sample environment configuration
-├── package.json                   # Frontend dependencies & npm scripts
-├── tsconfig.json                  # TypeScript compiler settings
-└── vite.config.ts                 # Vite bundler configuration & proxy
-```
-
----
-
-## 🧪 Testing & Verification
-
-TripCraft features multi-layer verification to guarantee high reliability:
+Build the frontend and backend, then start the packaged Java application:
 
 ```powershell
-# 1. Typecheck frontend
-npm run lint
-
-# 2. Run backend test suite
-npm run test:backend
-
-# 3. Build frontend bundle
+npm ci
 npm run build
-
-# 4. Install browser binaries & execute E2E tests
-npx playwright install chromium
-npm run test:e2e
+npm run build:backend
+npm start
 ```
 
-The Playwright browser tests launch the real Spring Boot JAR with isolated local HTTP provider fixtures to validate end-to-end trip creation, weather adaptation, and session restoration.
+Open `http://localhost:8080`. The Spring Boot application serves the built frontend and API from the same process.
 
----
+## Configuration
 
-## 🛠️ Troubleshooting & Windows Notes
+Set environment variables in your deployment platform or in a local `.env` file. Never commit real API keys or session secrets.
 
-<details>
-<summary><b>Click to expand Windows / Java environment troubleshooting</b></summary>
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `PORT` | No | HTTP port; defaults to `8080` and uses the platform-provided value when set. |
+| `SERPAPI_API_KEY` | No | Enables live travel search results. |
+| `GROQ_API_KEY` | No | Enables optional AI ranking of discovered candidates. |
+| `GROQ_MODEL` | No | Groq model name; defaults to `openai/gpt-oss-120b`. |
+| `WEATHER_API_KEY` | No | Optional key for a weather provider endpoint that requires one. |
+| `WEATHER_BASE_URL` | No | Weather endpoint; defaults to Open-Meteo. |
+| `DATA_DIR` | No | Directory for persisted trip state; defaults to `.data`. |
+| `SESSION_SECRET` | Recommended in production | Stable secret for signing guest session cookies. |
+| `COOKIE_SECURE` | Recommended in production | Set `true` when serving over HTTPS. |
+| `FRONTEND_ORIGIN` | No | Allowed frontend origin; defaults to `http://localhost:3000`. |
 
-### 1. "No compiler is provided in this environment"
-If Maven reports this error, your `java` command is pointing to a JRE rather than a full JDK.
-- Install **JDK 17** or newer (e.g., from [Adoptium Eclipse Temurin](https://adoptium.net/)).
-- Set your `JAVA_HOME` environment variable to the root JDK folder (not the `bin` directory):
-  ```powershell
-  $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-17.0.x"
-  npm run build:backend
-  ```
+See [`.env.example`](.env.example) for a local configuration template. Open-Meteo's default endpoint does not require a key.
 
-### 2. PowerShell Script Execution Disabled
-If PowerShell blocks npm scripts, run:
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+## Deployment notes
+
+- The backend Dockerfile is [`backend/Dockerfile`](backend/Dockerfile). Build with `backend` as the Docker build context, or configure the deployment root directory to `backend`.
+- The service listens on `0.0.0.0` and uses `PORT`, including the port assigned by Render.
+- The Vercel rewrite in [`vercel.json`](vercel.json) needs its destination changed from the placeholder to the deployed backend URL.
+- Configure a persistent disk for `DATA_DIR` if trip data must survive backend restarts. Use a stable `SESSION_SECRET` across restarts.
+
+## Useful commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Run Vite and the Java backend for development. |
+| `npm run dev:frontend` | Run only the Vite frontend. |
+| `npm run build` | Build the frontend into `dist/`. |
+| `npm run build:backend` | Package the Spring Boot backend. |
+| `npm start` | Start the packaged backend. |
+| `npm run lint` | Run the TypeScript compiler checks. |
+| `npm run test:backend` | Run the Java backend test suite. |
+| `npm run test:e2e` | Run the Playwright browser flow. |
+
+## Repository layout
+
+```text
+backend/   Spring Boot application, API, services, and tests
+docs/      Architecture notes, verification records, and workflow diagram
+public/    Static images and frontend assets
+scripts/   Build, development, and browser-check helpers
+src/       React application and UI components
 ```
-Or execute directly using `npm.cmd`:
-```powershell
-npm.cmd run dev
-```
 
-### 3. Session / Saved Trips Persistence
-Trips are saved in the `.data/` directory. If you clear browser cookies or change between `localhost` and `127.0.0.1`, session ownership tokens will not match. Use the exact same hostname when accessing saved itineraries.
+## License and credits
 
-</details>
-
----
-
-## 📄 License & Attribution
-
-- **License:** Distributed under the [MIT License](LICENSE).
-- **Photography:** Sourced imagery credits are cataloged in [`public/images/credits.json`](public/images/credits.json).
-- **Weather Data:** Powered by [Open-Meteo](https://open-meteo.com) under Non-Commercial terms.
-
----
-
-<div align="center">
-  <sub>Built with ❤️ for travelers exploring the incredible diversity of India.</sub>
-</div>
+TripCraft is distributed under the [MIT License](LICENSE). Image credits are listed in [`public/images/credits.json`](public/images/credits.json). Weather data is provided by [Open-Meteo](https://open-meteo.com/).
