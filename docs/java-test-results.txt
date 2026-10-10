@@ -1,0 +1,9 @@
+-------------------------------------------------------------------------------
+Test set: in.tripcraft.BackendIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.38 s -- in in.tripcraft.BackendIntegrationTest
+
+-------------------------------------------------------------------------------
+Test set: in.tripcraft.PlannerTest
+-------------------------------------------------------------------------------
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.260 s -- in in.tripcraft.PlannerTest

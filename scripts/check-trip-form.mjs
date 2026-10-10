@@ -1,0 +1,35 @@
+﻿import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+const browser = await chromium.launch({headless:true, channel:'msedge'});
+try {
+ const page = await browser.newPage({viewport:{width:390,height:844}});
+ await page.goto('http://127.0.0.1:3000');
+ await page.getByRole('button',{name:'Enter TripCraft'}).click();
+ await page.getByRole('button',{name:'Craft my weekend',exact:true}).click();
+ const location = page.getByLabel('Destination',{exact:true});
+ assert.ok(await location.getAttribute('list'));
+ await location.fill('Jaipur');
+ await page.getByText('Optional flight search',{exact:true}).click();
+ await page.getByLabel('Departure airport',{exact:true}).selectOption('BOM');
+ await page.getByRole('button',{name:'Continue',exact:true}).click();
+ await page.getByRole('alert').filter({hasText:'Choose two different airports'}).waitFor();
+ await page.getByLabel('Arrival airport',{exact:true}).selectOption('JAI');
+ await page.getByRole('button',{name:'Continue',exact:true}).click();
+ await page.getByRole('slider',{name:'Budget range'}).fill('25000');
+ assert.equal(await page.getByRole('spinbutton').first().inputValue(),'25000');
+ await page.getByRole('button',{name:'Continue',exact:true}).click();
+ await page.getByLabel('Meal preference',{exact:true}).selectOption('Veg & non-veg');
+ await page.getByRole('button',{name:'Continue',exact:true}).click();
+ await page.getByText('Meals: Veg & non-veg',{exact:true}).waitFor();
+ await page.getByText('Flight search: BOM to JAI',{exact:true}).waitFor();
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth > innerWidth),false);
+ let payload;
+ await page.route('**/api/v1/trips',async route=>{payload=route.request().postDataJSON(); await route.fulfill({status:422,contentType:'application/json',body:JSON.stringify({detail:'Form check complete'})});});
+ await page.getByRole('button',{name:'Craft my weekend',exact:true}).click();
+ await page.getByText('Form check complete',{exact:true}).waitFor();
+ assert.deepEqual(payload.dietary,['Veg & non-veg']);
+ assert.equal(payload.budget.amountINR,25000);
+ assert.equal(payload.departureAirport,'BOM');
+ assert.equal(payload.arrivalAirport,'JAI');
+ console.log('PASS: mobile location suggestions, airport validation, budget slider, meal selection, review, and submitted values. No live provider calls made.');
+} finally {await browser.close();}

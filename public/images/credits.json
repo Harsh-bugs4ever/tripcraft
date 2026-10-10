@@ -1,0 +1,30 @@
+[
+  {
+    "file": "jaipur.jpg",
+    "source": "https://unsplash.com/s/photos/hawa-mahal-jaipur",
+    "credit": "Hawa Mahal, Jaipur",
+    "license": "Unsplash License",
+    "url": "https://images.unsplash.com/photo-1650530777057-3a7dbc24bf6c?w=1600&q=85&fit=crop"
+  },
+  {
+    "file": "kerala.jpg",
+    "source": "https://unsplash.com/photos/1jqF6xG_W0A",
+    "credit": "Kerala houseboat \u2014 Ramsankar S R",
+    "license": "Unsplash License",
+    "url": "https://images.unsplash.com/photo-1572002265188-173c1a2f6699?w=1600&q=85&fit=crop"
+  },
+  {
+    "file": "coorg.jpg",
+    "source": "https://unsplash.com/photos/4jBfw5bbkBw",
+    "credit": "Anshuman Kumar \u2014 Coorg, Karnataka",
+    "url": "https://images.unsplash.com/photo-1694608217125-ea7080a35de0?w=1000&q=80&fit=crop",
+    "license": "Unsplash License"
+  },
+  {
+    "file": "coast.jpg",
+    "source": "https://unsplash.com/photos/w392BghukAc",
+    "credit": "Eshak Angell \u2014 Kerala coastline, illustrative coastal mood, not Alibaug",
+    "license": "Unsplash License",
+    "url": "https://images.unsplash.com/photo-1679754766837-d32b3b132718?w=1000&q=80&fit=crop"
+  }
+]

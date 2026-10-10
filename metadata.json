@@ -1,0 +1,5 @@
+{
+  "name": "TripCraft",
+  "description": "India travel planner with a Java Spring Boot backend, real provider data, weather replanning, trip extensions and saved plans.",
+  "requestFramePermissions": []
+}
