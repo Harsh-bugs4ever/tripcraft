@@ -56,6 +56,11 @@ export function TripWizard({
     breakMinutes: 30,
     arrivalConstraint: "Morning Arrival (~10:00 AM)",
     departureConstraint: "Late Evening Return (~06:00 PM)",
+    intercityMode:
+      initialDraft?.intercityMode ??
+      (initialDraft?.departureAirport && initialDraft?.arrivalAirport
+        ? "FLIGHT"
+        : "NONE"),
     ...initialDraft,
   });
   const [anchorOn, setAnchorOn] = useState(!!initialDraft?.anchor),
@@ -75,11 +80,11 @@ export function TripWizard({
   const mealOptions = ["Vegetarian", "Non-vegetarian", "Veg & non-veg"];
   const mealPreference = draft.dietary?.find(value => mealOptions.includes(value)) || "";
   const validate = () => {
-    if (step === 0 && (draft.departureAirport || draft.arrivalAirport) &&
+    if (step === 0 && draft.intercityMode === "FLIGHT" &&
         (!/^[A-Z]{3}$/.test(draft.departureAirport || "") ||
          !/^[A-Z]{3}$/.test(draft.arrivalAirport || "") ||
          draft.departureAirport === draft.arrivalAirport))
-      return "Choose two different airports with valid 3-letter codes, or clear both for no flight search.";
+      return "Choose two different airports with valid 3-letter codes for flight search.";
     if (
       step === 0 &&
       (!draft.originCity?.trim() ||
@@ -221,15 +226,30 @@ export function TripWizard({
               with similar names. Results depend on live search coverage. Transport to your
               destination is separate from arrival time.
             </p>
-            <details>
-              <summary className="text-sm font-semibold cursor-pointer">
-                Optional flight search
-              </summary>
+            <label>
+              <span className="field-label">Intercity travel mode</span>
+              <select
+                className="form-field"
+                value={draft.intercityMode || "NONE"}
+                onChange={(e) => update({ intercityMode: e.target.value as TripDraft["intercityMode"] })}
+              >
+                <option value="NONE">Skip transport search</option>
+                <option value="FLIGHT">Flight</option>
+                <option value="TRAIN">Train preferred</option>
+                <option value="BUS">Bus preferred</option>
+              </select>
+            </label>
+            {draft.intercityMode === "FLIGHT" && (
               <div className="feature-grid mt-4">
                 <AirportField label="Departure airport" value={draft.departureAirport} onChange={departureAirport => update({departureAirport})} />
                 <AirportField label="Arrival airport" value={draft.arrivalAirport} onChange={arrivalAirport => update({arrivalAirport})} />
               </div>
-            </details>
+            )}
+            {(draft.intercityMode === "TRAIN" || draft.intercityMode === "BUS") && (
+              <p className="text-xs text-[var(--text-muted)]">
+                We’ll look for a public transit route with your selected mode preferred where available. Schedules, fares, and seats must be confirmed with the provider.
+              </p>
+            )}
           </>
         )}
         {step === 1 && (
@@ -599,7 +619,9 @@ export function TripWizard({
                 {draft.pace?.toLowerCase()} pace · {draft.interests?.join(", ")}
               </p>
               <p>Meals: {draft.dietary?.filter(Boolean).join(", ") || "No preference"}</p>
-              {draft.departureAirport && <p>Flight search: {draft.departureAirport} to {draft.arrivalAirport}</p>}
+              {draft.intercityMode && draft.intercityMode !== "NONE" && (
+                <p>Intercity mode: {draft.intercityMode === "TRAIN" ? "Train preferred" : draft.intercityMode === "BUS" ? "Bus preferred" : `Flight ${draft.departureAirport} to ${draft.arrivalAirport}`}</p>
+              )}
               {anchorOn && (
                 <p>
                   Must-do: {anchor.name}, day {anchor.day} at {anchor.time}

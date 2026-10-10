@@ -71,6 +71,10 @@ public class DiscoveryService {
         + URLEncoder.encode(q, StandardCharsets.UTF_8);
   }
 
+  private static String routeSlug(String city) {
+    return city.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+  }
+
   public static boolean safeUrl(String u) {
     try {
       var uri = URI.create(u);
@@ -341,7 +345,14 @@ public class DiscoveryService {
         warnings.add("Hotel search unavailable. No stay quote included.");
       }
     ObjectNode transport = null;
-    if (!str(draft, "departureAirport").isBlank() && !str(draft, "arrivalAirport").isBlank())
+    String intercityMode = str(draft, "intercityMode");
+    // Keep old saved drafts and API clients working: airport fields imply flight search.
+    if (intercityMode.isBlank()
+        && !str(draft, "departureAirport").isBlank()
+        && !str(draft, "arrivalAirport").isBlank()) intercityMode = "FLIGHT";
+    if (intercityMode.equals("FLIGHT")
+        && !str(draft, "departureAirport").isBlank()
+        && !str(draft, "arrivalAirport").isBlank())
       try {
         var params =
             new HashMap<>(
@@ -395,6 +406,65 @@ public class DiscoveryService {
       } catch (Exception e) {
         warnings.add("Flight search unavailable. Check provider directly.");
       }
+    else if (intercityMode.equals("TRAIN") || intercityMode.equals("BUS")) {
+      String prefer = intercityMode.equals("TRAIN") ? "train" : "bus";
+      String origin = str(draft, "originCity");
+      String destination = str(draft, "destinationCity");
+      String mapUrl =
+          "https://www.google.com/maps/dir/?api=1&origin="
+              + URLEncoder.encode(origin + ", India", StandardCharsets.UTF_8)
+              + "&destination="
+              + URLEncoder.encode(destination + ", India", StandardCharsets.UTF_8)
+              + "&travelmode=transit&transit_mode="
+              + prefer;
+      String bookingUrl = intercityMode.equals("TRAIN")
+          ? "https://www.irctc.co.in/nget/train-search"
+          : "https://www.redbus.in/bus-tickets/" + routeSlug(origin) + "-to-" + routeSlug(destination);
+      transport =
+          obj(
+              "mode", intercityMode,
+              "title", (intercityMode.equals("TRAIN") ? "Train" : "Bus") + " preferred route",
+              "route", origin + " → " + destination,
+              "typicalDurationMinutes", 0,
+              "estimatedCostPaise", 0,
+              "status", "UNKNOWN",
+              "providerLink", mapUrl,
+              "bookingLink", bookingUrl,
+              "sourceNotes", "Route search is a suggestion only. Schedules, fares and seat availability"
+                  + " are not confirmed. Check the booking provider before travel.");
+      try {
+        var directions =
+            serp(
+                Map.of(
+                    "engine", "google_maps_directions",
+                    "start_addr", origin + ", India",
+                    "end_addr", destination + ", India",
+                    "travel_mode", "3",
+                    "prefer", prefer,
+                    "distance_unit", "0",
+                    "gl", "in",
+                    "hl", "en"));
+        var options = objects(directions.path("directions"));
+        ObjectNode route =
+            options.stream()
+                .filter(option -> str(option, "travel_mode").equalsIgnoreCase("Transit"))
+                .findFirst()
+                .orElse(null);
+        if (route != null) {
+          transport.put("typicalDurationMinutes", route.path("duration").asInt() / 60);
+          transport.put("sourceNotes", "Google Maps transit directions with " + prefer
+              + " preferred where available. Schedules, fares and seat availability are not"
+              + " confirmed; check the booking provider before travel.");
+          if (!str(route, "via").isBlank()) transport.put("via", str(route, "via"));
+          sources.add(source("transit-directions", "Google Maps Directions", str(transport, "title"), mapUrl));
+          warnings.add("Transit route is a planning suggestion; confirm current schedules and fares.");
+        } else {
+          warnings.add("No " + prefer + " transit route was returned for this city pair.");
+        }
+      } catch (Exception e) {
+        warnings.add((prefer.equals("train") ? "Train" : "Bus") + " route search unavailable. Check provider directly.");
+      }
+    }
     var dates = dates(draft);
     var coords = pool.get(0).path("coordinates");
     var forecast =

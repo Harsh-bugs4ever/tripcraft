@@ -293,10 +293,20 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({
 
           {activeVersion.intercityTransport && (
             <div className="neymo-card p-5 space-y-2">
-              <h3 className="font-semibold">Getting there</h3>
+              <h3 className="font-semibold">
+                {activeVersion.intercityTransport.title || "Getting there"}
+              </h3>
               <p className="text-sm">
                 {activeVersion.intercityTransport.route}
               </p>
+              {activeVersion.intercityTransport.typicalDurationMinutes > 0 && (
+                <p className="text-sm">
+                  About {activeVersion.intercityTransport.typicalDurationMinutes} minutes
+                  {activeVersion.intercityTransport.via
+                    ? ` · ${activeVersion.intercityTransport.via}`
+                    : ""}
+                </p>
+              )}
               {activeVersion.intercityTransport.observedQuoteINR != null && (
                 <p className="text-sm">
                   Provider-displayed price: ₹
@@ -308,14 +318,32 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({
               <p className="text-xs">
                 {activeVersion.intercityTransport.sourceNotes}
               </p>
-              <a
-                className="text-xs underline"
-                href={activeVersion.intercityTransport.providerLink}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Check flight options ↗
-              </a>
+              <div className="flex flex-wrap gap-x-4 gap-y-2">
+                <a
+                  className="text-xs underline"
+                  href={activeVersion.intercityTransport.providerLink}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {activeVersion.intercityTransport.mode === "TRAIN"
+                    ? "Check transit route ↗"
+                    : activeVersion.intercityTransport.mode === "BUS"
+                      ? "Check transit route ↗"
+                      : "Check flight options ↗"}
+                </a>
+                {activeVersion.intercityTransport.bookingLink && (
+                  <a
+                    className="text-xs underline"
+                    href={activeVersion.intercityTransport.bookingLink}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {activeVersion.intercityTransport.mode === "TRAIN"
+                      ? "Search trains on IRCTC ↗"
+                      : "Search buses on redBus ↗"}
+                  </a>
+                )}
+              </div>
             </div>
           )}
           {/* Stay Panel */}

@@ -180,13 +180,15 @@ export interface TripStay {
 
 export interface IntercityTransportOption {
   observedQuoteINR?: number;
-  mode: "CAR_DRIVE" | "TRAIN_EXP" | "FLIGHT" | "FERRY";
+  mode: "CAR_DRIVE" | "TRAIN_EXP" | "TRAIN" | "BUS" | "FLIGHT" | "FERRY";
   title: string;
   route: string;
+  via?: string;
   typicalDurationMinutes: number;
   estimatedCostPaise: number;
   status: EvidenceStatus;
   providerLink: string;
+  bookingLink?: string;
   sourceNotes: string;
 }
 
@@ -268,6 +270,7 @@ export interface TripDraft {
   anchor?: { name: string; day: number; time: string; durationMinutes: number };
   departureAirport?: string;
   arrivalAirport?: string;
+  intercityMode?: "NONE" | "FLIGHT" | "TRAIN" | "BUS";
   id: string;
   userId: string;
   revision: number;

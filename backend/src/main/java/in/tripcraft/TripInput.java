@@ -33,7 +33,8 @@ public record TripInput(
     @Min(15) @Max(120) Integer breakMinutes,
     @Valid Anchor anchor,
     @Pattern(regexp = "[A-Z]{3}") String departureAirport,
-    @Pattern(regexp = "[A-Z]{3}") String arrivalAirport) {
+    @Pattern(regexp = "[A-Z]{3}") String arrivalAirport,
+    @Pattern(regexp = "NONE|FLIGHT|TRAIN|BUS") String intercityMode) {
   public enum Pace {
     RELAXED,
     BALANCED,
@@ -75,6 +76,7 @@ public record TripInput(
     n.put("mealBudgetINR", mealBudgetINR == null ? 350 : mealBudgetINR);
     n.put("maxWalkingKm", maxWalkingKm == null ? 3 : maxWalkingKm);
     n.put("breakMinutes", breakMinutes == null ? 30 : breakMinutes);
+    n.put("intercityMode", intercityMode == null ? "" : intercityMode);
     if (cuisines == null) n.set("cuisines", arr());
     return n;
   }

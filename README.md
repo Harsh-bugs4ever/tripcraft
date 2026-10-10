@@ -26,6 +26,8 @@ TripCraft is a **modular monolith**. These backend services run in one Spring Bo
 - Build itineraries for trips from 1 to 14 days.
 - Set travel pace, budget, food preferences, accessibility needs, and fixed activities.
 - Review places sourced from live provider results.
+- Choose flight search or bus- or train-preferred transit route suggestions where provider coverage is available.
+- Open train searches on IRCTC and bus route listings on redBus; TripCraft does not sell tickets or claim seat availability.
 - Check forecasts and adapt plans around weather risks.
 - Track trip budgets and edit, lock, or mark itinerary stops as visited.
 - Save trips with signed guest sessions, then export or print an itinerary.
@@ -39,6 +41,7 @@ TripCraft is a **modular monolith**. These backend services run in one Spring Bo
 | Maps | Leaflet and OpenStreetMap tiles |
 | Backend | Java 17, Spring Boot 3.5, embedded Tomcat |
 | Trip data | SerpApi for travel search; Open-Meteo for weather |
+| Transit routes | SerpApi Google Maps Directions, with bus or train preference |
 | Optional ranking | Groq API |
 | Persistence | Atomic JSON snapshots in the configured data directory |
 
